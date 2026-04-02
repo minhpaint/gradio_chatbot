@@ -7,14 +7,15 @@ load_dotenv()
 # Read OpenAI API key from environment (do not hardcode keys)
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
-if not OPENAI_API_KEY:
-	# Be explicit - the app should not proceed silently without an API key.
-	# Raise here so callers get an immediate, informative error.
-	raise RuntimeError(
-		"OPENAI_API_KEY not found in environment. Set it in .env or the environment."
-	)
+# If no API key is provided, we run in a safe "fallback" mode which
+# doesn't call the OpenAI API. This lets the project run for testing
+# or development without an API key.
+USE_OPENAI = bool(OPENAI_API_KEY)
 
-# Model and generation settings
-MODEL_NAME = "gpt-4o-mini"
-TEMPERATURE = 0.7
-MAX_TOKENS = 1024
+# Model and generation settings (allow overrides from environment)
+MODEL_NAME = os.getenv("MODEL_NAME", "gpt-4o-mini")
+TEMPERATURE = float(os.getenv("TEMPERATURE", "0.7"))
+MAX_TOKENS = int(os.getenv("MAX_TOKENS", "1024"))
+
+# If you want strict behaviour (fail when no API key), set
+# `OPENAI_API_KEY` in your environment or in a .env file.
